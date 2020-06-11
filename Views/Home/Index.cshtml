@@ -1,8 +1,37 @@
-﻿@model IEnumerable<AspDotnetMvcToyApp.Models.Employee>
+﻿@model HomeViewModel
 
 @{
     ViewData["Title"] = "ASP Toy App";
 }
+
+
+<h1>Register Employee</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Register">
+            <div class="form-group">
+                <label asp-for="FocusedEmployee.FullName" class="control-label"></label>
+                <input asp-for="FocusedEmployee.FullName" class="form-control" />
+                <span asp-validation-for="FocusedEmployee.FullName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FocusedEmployee.Email" class="control-label"></label>
+                <input asp-for="FocusedEmployee.Email" class="form-control" />
+                <span asp-validation-for="FocusedEmployee.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Register" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<hr />
 
 <h1>Employee List</h1>
 
@@ -10,16 +39,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FullName)
+                @Html.DisplayNameFor(model => model.Employees[0].FullName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
+                @Html.DisplayNameFor(model => model.Employees[0].Email)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Employees)
         {
             <tr>
                 <td>

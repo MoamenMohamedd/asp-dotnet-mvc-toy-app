@@ -24,7 +24,33 @@ namespace AspDotnetMvcToyApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Employees.ToListAsync());
+            var homeViewModel = new HomeViewModel
+            {
+                Employees = await _context.Employees.ToListAsync(),
+                FocusedEmployee = null
+            };
+
+            return View(homeViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register([Bind("Id,FullName,Email", Prefix = "FocusedEmployee")] Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(employee);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            var homeViewModel = new HomeViewModel
+            {
+                Employees = await _context.Employees.ToListAsync(),
+                FocusedEmployee = employee
+            };
+
+            return View("Index", homeViewModel);
         }
 
         public IActionResult Privacy()

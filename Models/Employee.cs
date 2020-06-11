@@ -11,7 +11,8 @@ namespace AspDotnetMvcToyApp.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(60, MinimumLength = 3)]
+        [Display(Name ="Full Name")]
+        [StringLength(60, MinimumLength = 3, ErrorMessage = "Name length must be between {2} and {1} characters")]
         public string FullName { get; set; }
 
         [EmailAddress]
