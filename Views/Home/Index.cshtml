@@ -5,11 +5,14 @@
 }
 
 
-<h1>Register Employee</h1>
+<h1>@ViewData["FormAction"] Employee</h1>
 
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Register">
+        <form asp-action=@ViewData["FormAction"]>
+            @if (ViewData["FormAction"].Equals("Edit"))
+            {<input type="hidden" asp-for="FocusedEmployee.Id" />}
+
             <div class="form-group">
                 <label asp-for="FocusedEmployee.FullName" class="control-label"></label>
                 <input asp-for="FocusedEmployee.FullName" class="form-control" />
@@ -21,7 +24,7 @@
                 <span asp-validation-for="FocusedEmployee.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Register" class="btn btn-primary" />
+                <input type="submit" value=@ViewData["FormAction"] class="btn btn-primary" />
             </div>
         </form>
     </div>
