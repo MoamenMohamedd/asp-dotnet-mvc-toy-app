@@ -30,10 +30,6 @@
     </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
-
 <hr />
 
 <h1>Employee List</h1>
@@ -63,9 +59,51 @@
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                     -
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a data-id="@item.Id" class="btn btn-primary" data-toggle="modal" data-target="#DeleteConfirmationModal">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+
+
+<div class="modal fade" id="DeleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="DeleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="DeleteConfirmationModalLabel">Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure ?</p>
+            </div>
+            <div class="modal-footer">
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" />
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(function () {
+            $('#DeleteConfirmationModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var id = button.data("id");
+                var modal = $(this);
+
+                modal.find('input[name=id]').val(id);
+            });
+        });
+    </script>
+}

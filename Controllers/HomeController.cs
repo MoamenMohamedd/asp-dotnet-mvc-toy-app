@@ -35,28 +35,6 @@ namespace AspDotnetMvcToyApp.Controllers
             return View(homeViewModel);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Id,FullName,Email", Prefix = "FocusedEmployee")] Employee employee)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            var homeViewModel = new HomeViewModel
-            {
-                Employees = await _context.Employees.ToListAsync(),
-                FocusedEmployee = employee
-            };
-
-            ViewData["FormAction"] = "Register";
-
-            return View("Index", homeViewModel);
-        }
-
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,6 +55,28 @@ namespace AspDotnetMvcToyApp.Controllers
             };
 
             ViewData["FormAction"] = "Edit";
+
+            return View("Index", homeViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register([Bind("Id,FullName,Email", Prefix = "FocusedEmployee")] Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(employee);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            var homeViewModel = new HomeViewModel
+            {
+                Employees = await _context.Employees.ToListAsync(),
+                FocusedEmployee = employee
+            };
+
+            ViewData["FormAction"] = "Register";
 
             return View("Index", homeViewModel);
         }
@@ -121,11 +121,31 @@ namespace AspDotnetMvcToyApp.Controllers
 
             return View("Index", homeViewModel);
         }
-
+        
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
+
 
         public IActionResult Privacy()
         {
