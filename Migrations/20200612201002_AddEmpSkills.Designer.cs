@@ -3,14 +3,16 @@ using AspDotnetMvcToyApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AspDotnetMvcToyApp.Migrations
 {
     [DbContext(typeof(ToyAppContext))]
-    partial class ToyAppContextModelSnapshot : ModelSnapshot
+    [Migration("20200612201002_AddEmpSkills")]
+    partial class AddEmpSkills
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,28 +76,6 @@ namespace AspDotnetMvcToyApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "PHP"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "ASP.NET"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "iOS"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Android"
-                        });
                 });
 
             modelBuilder.Entity("AspDotnetMvcToyApp.Models.EmployeeSkill", b =>

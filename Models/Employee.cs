@@ -18,5 +18,7 @@ namespace AspDotnetMvcToyApp.Models
         [EmailAddress]
         public string Email { get; set; }
 
+        public ICollection<EmployeeSkill> EmployeeSkills { get; set; }
+
     }
 }

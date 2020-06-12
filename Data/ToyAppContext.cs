@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspDotnetMvcToyApp.Data
 {
-    public class ToyAppContext:DbContext
+    public class ToyAppContext : DbContext
     {
         public ToyAppContext(DbContextOptions<ToyAppContext> options)
             : base(options)
@@ -15,5 +15,9 @@ namespace AspDotnetMvcToyApp.Data
         }
 
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<EmployeeSkill> EmployeeSkills { get; set; }
+
+        
     }
 }
