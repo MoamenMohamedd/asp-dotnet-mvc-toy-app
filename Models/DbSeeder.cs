@@ -11,46 +11,29 @@ namespace AspDotnetMvcToyApp.Models
 {
     public class DbSeeder
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static void Initialize(ToyAppContext context)
         {
-            using (var context = new ToyAppContext(
-                serviceProvider.GetRequiredService<DbContextOptions<ToyAppContext>>()))
+            if (!context.Employees.Any())
             {
-
-                if (context.Employees.Any())
+                var emp1 = new Employee
                 {
-                    return;
-                }
-
-                context.AddRange(
-                    new Employee
-                    {
-                        FullName = "Moamen Mohamed",
-                        Email = "moamenmohamedalii@gmail.com"
-                    },
-
-                    new Employee
-                    {
-                        FullName = "Ali Nour Eldin",
-                        Email = "ali@gmail.com",
-                    },
-
-                    new Employee
-                    {
-                        FullName = "Ammar Yasser Ismail",
-                    },
-
-                    new Employee
-                    {
-                        FullName = "Amr Saleh",
-                        Email = "amr@gmail.com",
-                    },
-
-                    new Employee
-                    {
-                        FullName = "Moamed Essam"
+                    FullName = "Moamen Mohamed",
+                    Email = "moamenmohamedalii@gmail.com",
+                    EmployeeSkills = new List<EmployeeSkill> {
+                        new EmployeeSkill { SkillId = 1 },
+                        new EmployeeSkill { SkillId = 2 },
+                        new EmployeeSkill { SkillId = 4 }
                     }
-                );
+                };
+
+                var emp2 = new Employee
+                {
+                    FullName = "Moamed Essam",
+                };
+
+                context.Add(emp1);
+                context.Add(emp2);
+
                 context.SaveChanges();
             }
         }

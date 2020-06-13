@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspDotnetMvcToyApp.Data;
 using AspDotnetMvcToyApp.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +25,8 @@ namespace AspDotnetMvcToyApp
 
                 try
                 {
-                    DbSeeder.Initialize(serviceProvider);
+                    var context = serviceProvider.GetRequiredService<ToyAppContext>();
+                    DbSeeder.Initialize(context);
                 }
                 catch (Exception ex)
                 {
