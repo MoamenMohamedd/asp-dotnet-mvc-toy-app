@@ -78,6 +78,16 @@ namespace AspDotnetMvcToyApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (employee.Skills != null && employee.Skills.Length > 0)
+                {
+                    string[] skillsIds = employee.Skills.Split(",");
+                    employee.EmployeeSkills = new List<EmployeeSkill>();
+                    foreach (int skillId in skillsIds.Select(v => Int16.Parse(v)))
+                    {
+                        employee.EmployeeSkills.Add(new EmployeeSkill { SkillId = skillId, EmployeeId = employee.Id });
+                    }
+                }
+
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
