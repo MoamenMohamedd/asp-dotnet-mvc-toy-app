@@ -1,9 +1,14 @@
-﻿@model HomeViewModel
+﻿@namespace AspDotnetMvcToyApp
+@model HomeViewModel
 
 @{
     ViewData["Title"] = "ASP Toy App";
-}
 
+    string focusedEmpskills = "";
+    if (Model.FocusedEmployee != null)
+        focusedEmpskills = Model.FocusedEmployee.Skills;
+
+}
 
 <h1>@ViewData["FormAction"] Employee</h1>
 
@@ -23,6 +28,14 @@
                 <input asp-for="FocusedEmployee.Email" class="form-control" />
                 <span asp-validation-for="FocusedEmployee.Email" class="text-danger"></span>
             </div>
+
+            <div class="form-group">
+                <label asp-for="FocusedEmployee.Skills" class="control-label"></label>
+
+                <input asp-for="FocusedEmployee.Skills" class="typeahead" />
+
+            </div>
+
             <div class="form-group">
                 <input type="submit" value=@ViewData["FormAction"] class="btn btn-primary" />
             </div>
@@ -92,9 +105,16 @@
 </div>
 
 
+@section Styles{
+    <link rel="stylesheet" href="~/lib/bootstrap-tagsinput/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-tagsinput/bootstrap-tagsinput-typeahead.css" />
+}
+
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
+    <script src="~/lib/typeahead.js/typeahead.bundle.min.js"></script>
+    <script src="~/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
     <script>
         $(function () {
             $('#DeleteConfirmationModal').on('show.bs.modal', function (event) {
@@ -105,5 +125,46 @@
                 modal.find('input[name=id]').val(id);
             });
         });
+    </script>
+    <script>
+
+        var tags = new Bloodhound({
+            datumTokenizer: function (skill) {
+                return skill.name.split('');
+            },
+            queryTokenizer: function (q) {
+                return q.split('');
+            },
+            identify: function (skill) {
+                return skill.id;
+            },
+            prefetch: {
+                url: "/home/skills"
+            }
+        });
+        tags.initialize()
+
+        var elt = $('.typeahead');
+        elt.tagsinput({
+            tagClass: 'badge badge-info',
+            itemText: 'name',
+            itemValue: 'id',
+            freeInput: false,
+            typeaheadjs: [{
+                highlight: true
+            }, {
+                name: "tags",
+                displayKey: "name",
+                source: tags.ttAdapter()
+            }]
+        });
+
+        let skillsInJs = '@focusedEmpskills';
+        let arrayOfSkillId = skillsInJs.split(",");
+
+        tags.get([...arrayOfSkillId]).forEach((skill) => {
+            elt.tagsinput('add', skill);
+        });
+
     </script>
 }

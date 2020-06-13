@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,6 +20,9 @@ namespace AspDotnetMvcToyApp.Models
         public string Email { get; set; }
 
         public ICollection<EmployeeSkill> EmployeeSkills { get; set; }
+
+        [NotMapped]
+        public string Skills { get; set; }
 
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using AspDotnetMvcToyApp.Models;
 using AspDotnetMvcToyApp.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace AspDotnetMvcToyApp.Controllers
 {
@@ -28,11 +29,20 @@ namespace AspDotnetMvcToyApp.Controllers
             {
                 Employees = await _context.Employees.ToListAsync(),
                 FocusedEmployee = null
+
             };
 
             ViewData["FormAction"] = "Register";
 
             return View(homeViewModel);
+        }
+
+        public async Task<Array> Skills()
+        {
+            var query = from skill in _context.Skills
+                        select new { skill.Id, skill.Name };
+
+            return await query.ToArrayAsync();
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -42,11 +52,14 @@ namespace AspDotnetMvcToyApp.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees.Include(e => e.EmployeeSkills).SingleAsync(e => e.Id == id);
             if (employee == null)
             {
                 return NotFound();
             }
+
+            var skillsIds = employee.EmployeeSkills.Select(e => e.SkillId);
+            employee.Skills = String.Join(',', skillsIds);
 
             var homeViewModel = new HomeViewModel
             {
@@ -61,7 +74,7 @@ namespace AspDotnetMvcToyApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Id,FullName,Email", Prefix = "FocusedEmployee")] Employee employee)
+        public async Task<IActionResult> Register([Bind("Id,FullName,Email,Skills", Prefix = "FocusedEmployee")] Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -121,7 +134,7 @@ namespace AspDotnetMvcToyApp.Controllers
 
             return View("Index", homeViewModel);
         }
-        
+
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
@@ -141,11 +154,6 @@ namespace AspDotnetMvcToyApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-
-
-
-
 
         public IActionResult Privacy()
         {
