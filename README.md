@@ -3,6 +3,10 @@
 
 <img src="demo.gif"/>
 
+## Live demo
+
+[https://aspmvctoyapp.azurewebsites.net/](https://aspmvctoyapp.azurewebsites.net/)
+
 ## Dependencies
 
 * Server Side
@@ -28,3 +32,5 @@
 * [Razor docs](https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-3.1)
 
 * [Entity Framework core docs](https://docs.microsoft.com/en-us/ef/core/)
+
+* [Azure deploy to an App Service on Linux](https://docs.microsoft.com/en-us/azure/app-service/containers/tutorial-dotnetcore-sqldb-app)
