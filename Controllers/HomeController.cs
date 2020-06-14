@@ -106,7 +106,7 @@ namespace AspDotnetMvcToyApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email", Prefix = "FocusedEmployee")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email,Skills", Prefix = "FocusedEmployee")] Employee employee)
         {
             if (id != employee.Id)
             {
@@ -117,7 +117,30 @@ namespace AspDotnetMvcToyApp.Controllers
             {
                 try
                 {
+                    // Update Email and FullName
                     _context.Update(employee);
+
+                    // Load employee skills
+                    _context.Entry(employee).Collection(e => e.EmployeeSkills).Load();
+
+                    // Find out changes in skills
+                    List<int> currentSkills = employee.EmployeeSkills.Select(v => v.SkillId).ToList();
+                    List<int> incomingSkills = new List<int> { };
+                    if (employee.Skills != null && employee.Skills.Length > 0)
+                        incomingSkills = employee.Skills.Split(",").Select(v => Int32.Parse(v)).ToList();
+
+                    List<int> toAdd = incomingSkills.Except(currentSkills).ToList();
+                    List<int> toRemove = currentSkills.Except(incomingSkills).ToList();
+
+                    foreach (int skillId in toAdd)
+                        employee.EmployeeSkills.Add(new EmployeeSkill { EmployeeId = id, SkillId = skillId });
+
+                    foreach (int skillId in toRemove)
+                        employee.EmployeeSkills.Remove(employee.EmployeeSkills.Where(es => es.SkillId == skillId).Single());
+
+                    // Update skills changes
+                    _context.Update(employee);
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
