@@ -22,6 +22,7 @@ namespace AspDotnetMvcToyApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddDbContext<ToyAppContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnectionString")));
         }
 
@@ -50,7 +51,7 @@ namespace AspDotnetMvcToyApp
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id:int?}");
             });
         }
     }

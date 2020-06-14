@@ -2,7 +2,7 @@
 @model HomeViewModel
 
 @{
-    ViewData["Title"] = "ASP Toy App";
+    ViewData["Title"] = "ASP.NET Mvc Toy App";
 
     string focusedEmpskills = "";
     if (Model.FocusedEmployee != null)
@@ -31,9 +31,7 @@
 
             <div class="form-group">
                 <label asp-for="FocusedEmployee.Skills" class="control-label"></label>
-
-                <input asp-for="FocusedEmployee.Skills" class="typeahead" />
-
+                <input asp-for="FocusedEmployee.Skills" class="form-control typeahead" />
             </div>
 
             <div class="form-group">
@@ -43,8 +41,7 @@
     </div>
 </div>
 
-<hr />
-
+<br />
 <h1>Employee List</h1>
 
 <table class="table">
@@ -64,15 +61,16 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
+                    @item.FullName
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Email)
+                    <a href="mailto:@item.Email" class="nostyle">@item.Email</a>
+                    
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                    -
-                    <a data-id="@item.Id" class="btn btn-primary" data-toggle="modal" data-target="#DeleteConfirmationModal">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="nostyle"><i class="fa fa-pencil-square-o fa-lg action-edit" aria-hidden="true"></i></a>
+                    
+                    <a data-id="@item.Id" data-toggle="modal" data-target="#DeleteConfirmationModal" class="nostyle ml-2"><i class="fa fa-trash-o fa-lg action-delete"></i></a>
                 </td>
             </tr>
         }
