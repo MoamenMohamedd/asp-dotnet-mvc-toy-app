@@ -2,10 +2,24 @@
 
 namespace AspDotnetMvcToyApp.Migrations
 {
-    public partial class AddEmpSkills : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Employees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FullName = table.Column<string>(maxLength: 60, nullable: false),
+                    Email = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Employees", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Skills",
                 columns: table => new
@@ -45,6 +59,17 @@ namespace AspDotnetMvcToyApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Skills",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "PHP" },
+                    { 2, "ASP.NET" },
+                    { 3, "iOS" },
+                    { 4, "Android" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_EmployeeSkills_EmployeeId",
                 table: "EmployeeSkills",
@@ -60,6 +85,9 @@ namespace AspDotnetMvcToyApp.Migrations
         {
             migrationBuilder.DropTable(
                 name: "EmployeeSkills");
+
+            migrationBuilder.DropTable(
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Skills");

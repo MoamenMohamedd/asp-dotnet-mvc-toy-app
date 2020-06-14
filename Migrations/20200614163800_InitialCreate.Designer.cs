@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspDotnetMvcToyApp.Migrations
 {
     [DbContext(typeof(ToyAppContext))]
-    [Migration("20200612214045_SeedDbWithSkills")]
-    partial class SeedDbWithSkills
+    [Migration("20200614163800_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
