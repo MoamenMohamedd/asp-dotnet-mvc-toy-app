@@ -1,0 +1,45 @@
+﻿<script src="~/lib/typeahead.js/typeahead.bundle.min.js"></script>
+<script src="~/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
+<script>
+    // Initialize suggestions engine
+    var tags = new Bloodhound({
+        datumTokenizer: function (skill) {
+            return skill.name.split('');
+        },
+        queryTokenizer: function (q) {
+            return q.split('');
+        },
+        identify: function (skill) {
+            return skill.id;
+        },
+        prefetch: {
+            url: "/home/skills"
+        },
+        transform: function (response) {
+            return response.map((skill) => { return { id: skill.id, name: skill.name }});
+        }
+    });
+    tags.initialize()
+
+    var elt = $('.typeahead');
+    elt.tagsinput({
+        tagClass: 'badge badge-info',
+        itemText: 'name',
+        itemValue: 'id',
+        freeInput: false,
+        typeaheadjs: [{
+            highlight: true
+        }, {
+            name: "tags",
+            displayKey: "name",
+            source: tags.ttAdapter()
+        }]
+    });
+
+    elt.each(function (i, input) {
+        let initialSkills = input.value.split(",");
+        tags.get([...initialSkills]).forEach((skill) => {
+            $(this).tagsinput('add', skill);
+        });
+    });
+</script>

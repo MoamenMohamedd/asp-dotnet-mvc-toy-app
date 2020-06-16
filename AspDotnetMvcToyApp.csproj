@@ -11,6 +11,12 @@
     <Compile Remove="Migrations\20200612193839_AddEmpSkills.Designer.cs" />
     <Compile Remove="Migrations\20200612213408_SeedDb.cs" />
     <Compile Remove="Migrations\20200612213408_SeedDb.Designer.cs" />
+    <Compile Remove="Migrations\20200615151407_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200615151407_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20200615151521_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200615151521_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20200615153932_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200615153932_InitialCreate.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.AzureKeyVault.HostingStartup" Version="2.0.4" />

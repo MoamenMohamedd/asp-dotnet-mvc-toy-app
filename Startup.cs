@@ -6,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using AspDotnetMvcToyApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using AspDotnetMvcToyApp.Repositories;
+using System;
 
 namespace AspDotnetMvcToyApp
 {
@@ -21,6 +23,8 @@ namespace AspDotnetMvcToyApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<ISkillRepository, SkillRepository>();
             services.AddControllersWithViews();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddDbContext<ToyAppContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnectionString")));

@@ -9,42 +9,42 @@ using AspDotnetMvcToyApp.Models;
 using AspDotnetMvcToyApp.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using AspDotnetMvcToyApp.Repositories;
+using AspDotnetMvcToyApp.ViewModels;
 
 namespace AspDotnetMvcToyApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly ToyAppContext _context;
+        private ILogger<HomeController> _logger;
+        private IEmployeeRepository _employeeRepository;
+        private ISkillRepository _skillRepository;
 
-        public HomeController(ToyAppContext context, ILogger<HomeController> logger)
+        public HomeController(IEmployeeRepository employeeRepository, ISkillRepository skillRepository, ILogger<HomeController> logger)
         {
-            _context = context;
+            _employeeRepository = employeeRepository;
+            _skillRepository = skillRepository;
             _logger = logger;
         }
 
+        // Get /home
         public async Task<IActionResult> Index()
         {
-            var homeViewModel = new HomeViewModel
-            {
-                Employees = await _context.Employees.ToListAsync(),
-                FocusedEmployee = null
-
-            };
+            var employees = await _employeeRepository.GetEmployees();
+            var homeViewModel = MapToHomeViewModel(employees);
 
             ViewData["FormAction"] = "Register";
 
             return View(homeViewModel);
         }
 
-        public async Task<Array> Skills()
+        // Get /home/skills
+        public async Task<List<Skill>> Skills()
         {
-            var query = from skill in _context.Skills
-                        select new { skill.Id, skill.Name };
-
-            return await query.ToArrayAsync();
+            return await _skillRepository.GetSkills();
         }
 
+        // Get /home/edit/id
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -52,100 +52,88 @@ namespace AspDotnetMvcToyApp.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.Include(e => e.EmployeeSkills).SingleAsync(e => e.Id == id);
+            var employee = await _employeeRepository.GetEmployeeWithSkills((int)id);
             if (employee == null)
             {
                 return NotFound();
             }
 
-            var skillsIds = employee.EmployeeSkills.Select(e => e.SkillId);
-            employee.Skills = String.Join(',', skillsIds);
+            var employees = await _employeeRepository.GetEmployees();
 
-            var homeViewModel = new HomeViewModel
-            {
-                Employees = await _context.Employees.ToListAsync(),
-                FocusedEmployee = employee
-            };
-
-            ViewData["FormAction"] = "Edit";
+            var homeViewModel = MapToHomeViewModel(employees, employee);
 
             return View("Index", homeViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Id,FullName,Email,Skills", Prefix = "FocusedEmployee")] Employee employee)
+        public async Task<IActionResult> Register([Bind("Id,FullName,Email,SkillsString")] EmployeeFormViewModel employeeFormViewModel)
         {
             if (ModelState.IsValid)
             {
-                if (employee.Skills != null && employee.Skills.Length > 0)
+                Employee newEmployee = new Employee { FullName = employeeFormViewModel.FullName, Email = employeeFormViewModel.Email };
+
+                List<int> skillsArray = employeeFormViewModel.getSkillsList();
+                if (skillsArray.Count > 0)
                 {
-                    string[] skillsIds = employee.Skills.Split(",");
-                    employee.EmployeeSkills = new List<EmployeeSkill>();
-                    foreach (int skillId in skillsIds.Select(v => Int16.Parse(v)))
+                    newEmployee.EmployeeSkills = new List<EmployeeSkill>();
+
+                    foreach (int skillId in skillsArray)
                     {
-                        employee.EmployeeSkills.Add(new EmployeeSkill { SkillId = skillId, EmployeeId = employee.Id });
+                        newEmployee.EmployeeSkills.Add(new EmployeeSkill { SkillId = skillId, EmployeeId = newEmployee.Id });
                     }
                 }
 
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
+                _employeeRepository.CreateEmployee(newEmployee);
+                await _employeeRepository.SaveAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
-            var homeViewModel = new HomeViewModel
-            {
-                Employees = await _context.Employees.ToListAsync(),
-                FocusedEmployee = employee
-            };
-
-            ViewData["FormAction"] = "Register";
+            var employees = await _employeeRepository.GetEmployees();
+            var homeViewModel = MapToHomeViewModel(employees);
+            homeViewModel.EmployeeFormViewModel = employeeFormViewModel;
 
             return View("Index", homeViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email,Skills", Prefix = "FocusedEmployee")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email,SkillsString")] EmployeeFormViewModel employeeFormViewModel)
         {
-            if (id != employee.Id)
+            if (id != employeeFormViewModel.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
+                Employee employee = null;
                 try
                 {
+                    employee = await _employeeRepository.GetEmployeeWithSkills(id);
                     // Update Email and FullName
-                    _context.Update(employee);
-
-                    // Load employee skills
-                    _context.Entry(employee).Collection(e => e.EmployeeSkills).Load();
+                    employee.FullName = employeeFormViewModel.FullName;
+                    employee.Email = employeeFormViewModel.Email;
 
                     // Find out changes in skills
                     List<int> currentSkills = employee.EmployeeSkills.Select(v => v.SkillId).ToList();
-                    List<int> incomingSkills = new List<int> { };
-                    if (employee.Skills != null && employee.Skills.Length > 0)
-                        incomingSkills = employee.Skills.Split(",").Select(v => Int32.Parse(v)).ToList();
+                    List<int> incomingSkills = employeeFormViewModel.getSkillsList();
 
                     List<int> toAdd = incomingSkills.Except(currentSkills).ToList();
                     List<int> toRemove = currentSkills.Except(incomingSkills).ToList();
 
+                    employee.EmployeeSkills.RemoveAll(es => toRemove.Contains(es.SkillId));
+
                     foreach (int skillId in toAdd)
                         employee.EmployeeSkills.Add(new EmployeeSkill { EmployeeId = id, SkillId = skillId });
 
-                    foreach (int skillId in toRemove)
-                        employee.EmployeeSkills.Remove(employee.EmployeeSkills.Where(es => es.SkillId == skillId).Single());
-
-                    // Update skills changes
-                    _context.Update(employee);
-
-                    await _context.SaveChangesAsync();
+                    _employeeRepository.UpdateEmployee(employee);
+                    await _employeeRepository.SaveAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.Id))
+                    if (employee == null)
                     {
                         return NotFound();
                     }
@@ -157,40 +145,58 @@ namespace AspDotnetMvcToyApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var homeViewModel = new HomeViewModel
-            {
-                Employees = await _context.Employees.ToListAsync(),
-                FocusedEmployee = employee
-            };
-
-            ViewData["FormAction"] = "Edit";
+            var employees = await _employeeRepository.GetEmployees();
+            var homeViewModel = MapToHomeViewModel(employees);
+            homeViewModel.EmployeeFormViewModel = employeeFormViewModel;
 
             return View("Index", homeViewModel);
-        }
-
-        private bool EmployeeExists(int id)
-        {
-            return _context.Employees.Any(e => e.Id == id);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _employeeRepository.GetEmployee(id);
             if (employee == null)
             {
                 return NotFound();
             }
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            _employeeRepository.DeleteEmployee(employee);
+            await  _employeeRepository.SaveAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Privacy()
+
+        private HomeViewModel MapToHomeViewModel(List<Employee> employees, Employee focusedEmployee = null)
         {
-            return View();
+            List<EmployeeTableRowViewModel> employeeTableRowViewModels = new List<EmployeeTableRowViewModel>();
+
+            foreach (Employee emp in employees)
+            {
+                employeeTableRowViewModels.Add(new EmployeeTableRowViewModel { Id = emp.Id, FullName = emp.FullName, Email = emp.Email });
+            }
+
+            EmployeeTableViewModel employeeTableViewModel = new EmployeeTableViewModel
+            {
+                Employees = employeeTableRowViewModels
+            };
+
+            EmployeeFormViewModel employeeFormViewModel = null;
+            if (focusedEmployee != null)
+            {
+                employeeFormViewModel = new EmployeeFormViewModel
+                {
+                    Id = focusedEmployee.Id,
+                    FullName = focusedEmployee.FullName,
+                    Email = focusedEmployee.Email,
+                    SkillsString = string.Join(",", focusedEmployee.EmployeeSkills.Select(es => es.SkillId))
+                };
+            }
+
+
+            return new HomeViewModel { EmployeeFormViewModel = employeeFormViewModel, EmployeeTableViewModel = employeeTableViewModel };
+
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

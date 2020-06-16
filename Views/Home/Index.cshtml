@@ -1,106 +1,17 @@
-﻿@namespace AspDotnetMvcToyApp
-@model HomeViewModel
+﻿@model HomeViewModel
 
 @{
     ViewData["Title"] = "ASP.NET Mvc Toy App";
-
-    string focusedEmpskills = "";
-    if (Model.FocusedEmployee != null)
-        focusedEmpskills = Model.FocusedEmployee.Skills;
-
 }
 
-<h1>@ViewData["FormAction"] Employee</h1>
-
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action=@ViewData["FormAction"]>
-            @if (ViewData["FormAction"].Equals("Edit"))
-            {<input type="hidden" asp-for="FocusedEmployee.Id" />}
-
-            <div class="form-group">
-                <label asp-for="FocusedEmployee.FullName" class="control-label"></label>
-                <input asp-for="FocusedEmployee.FullName" class="form-control" />
-                <span asp-validation-for="FocusedEmployee.FullName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FocusedEmployee.Email" class="control-label"></label>
-                <input asp-for="FocusedEmployee.Email" class="form-control" />
-                <span asp-validation-for="FocusedEmployee.Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="FocusedEmployee.Skills" class="control-label"></label>
-                <input asp-for="FocusedEmployee.Skills" class="form-control typeahead" />
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value=@ViewData["FormAction"] class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+<h1>Employee</h1>
+@await Html.PartialAsync("~/Views/Shared/_EmployeeFormPartial.cshtml", Model.EmployeeFormViewModel)
 
 <br />
+
 <h1>Employee List</h1>
+@await Html.PartialAsync("/Views/Shared/_EmployeeTablePartial.cshtml", Model.EmployeeTableViewModel)
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Employees[0].FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Employees[0].Email)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Employees)
-        {
-            <tr>
-                <td>
-                    @item.FullName
-                </td>
-                <td>
-                    <a href="mailto:@item.Email" class="nostyle">@item.Email</a>
-                    
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="nostyle"><i class="fa fa-pencil-square-o fa-lg action-edit" aria-hidden="true"></i></a>
-                    
-                    <a data-id="@item.Id" data-toggle="modal" data-target="#DeleteConfirmationModal" class="nostyle ml-2"><i class="fa fa-trash-o fa-lg action-delete"></i></a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-
-
-<div class="modal fade" id="DeleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="DeleteConfirmationModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="DeleteConfirmationModalLabel">Delete</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure ?</p>
-            </div>
-            <div class="modal-footer">
-                <form asp-action="Delete" method="post">
-                    <input type="hidden" name="id" />
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-warning">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 @section Styles{
@@ -111,58 +22,6 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script src="~/lib/typeahead.js/typeahead.bundle.min.js"></script>
-    <script src="~/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
-    <script>
-        $(function () {
-            $('#DeleteConfirmationModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var id = button.data("id");
-                var modal = $(this);
-
-                modal.find('input[name=id]').val(id);
-            });
-        });
-    </script>
-    <script>
-
-        var tags = new Bloodhound({
-            datumTokenizer: function (skill) {
-                return skill.name.split('');
-            },
-            queryTokenizer: function (q) {
-                return q.split('');
-            },
-            identify: function (skill) {
-                return skill.id;
-            },
-            prefetch: {
-                url: "/home/skills"
-            }
-        });
-        tags.initialize()
-
-        var elt = $('.typeahead');
-        elt.tagsinput({
-            tagClass: 'badge badge-info',
-            itemText: 'name',
-            itemValue: 'id',
-            freeInput: false,
-            typeaheadjs: [{
-                highlight: true
-            }, {
-                name: "tags",
-                displayKey: "name",
-                source: tags.ttAdapter()
-            }]
-        });
-
-        let skillsInJs = '@focusedEmpskills';
-        let arrayOfSkillId = skillsInJs.split(",");
-
-        tags.get([...arrayOfSkillId]).forEach((skill) => {
-            elt.tagsinput('add', skill);
-        });
-
-    </script>
+    @{await Html.RenderPartialAsync("_SkillsAutoCompleteScriptsPartial");}
+    @{await Html.RenderPartialAsync("_DeleteEmployeeModalScriptPartial");}
 }

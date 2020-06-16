@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AspDotnetMvcToyApp.Models
+namespace AspDotnetMvcToyApp.ViewModels
 {
-    public class Employee
+    public class EmployeeTableViewModel
+    {
+        public List<EmployeeTableRowViewModel> Employees { get; set; }
+    }
+
+    public class EmployeeTableRowViewModel
     {
         public int Id { get; set; }
 
         public string FullName { get; set; }
 
-        
         public string Email { get; set; }
-
-        public List<EmployeeSkill> EmployeeSkills { get; set; }
-
     }
 }

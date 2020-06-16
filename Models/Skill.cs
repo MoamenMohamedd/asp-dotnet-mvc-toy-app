@@ -13,6 +13,6 @@ namespace AspDotnetMvcToyApp.Models
         [Required]
         public string Name { get; set; }
 
-        public ICollection<EmployeeSkill> EmployeeSkills{ get; set; }
+        public List<EmployeeSkill> EmployeeSkills{ get; set; }
     }
 }
