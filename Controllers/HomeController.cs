@@ -33,8 +33,6 @@ namespace AspDotnetMvcToyApp.Controllers
             var employees = await _employeeRepository.GetEmployees();
             var homeViewModel = MapToHomeViewModel(employees);
 
-            ViewData["FormAction"] = "Register";
-
             return View(homeViewModel);
         }
 
